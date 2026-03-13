@@ -1,0 +1,17 @@
+services:
+  qbittorrent-automation:
+    build: .
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    network_mode: host
+    environment:
+      - CHECK_INTERVAL=60
+      - QBITTORRENT_URL=http://localhost:8080
+      - PING_HOST=
+      - IP_CHECK_CONTAINER=
+      - IP_ALLOWED=
+      - IP_DENIED=
+      - NTFY_URL=
+      - HTTP_PORT=8090
+      - LOG_LEVEL=INFO
