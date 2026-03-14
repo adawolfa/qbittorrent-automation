@@ -89,16 +89,36 @@ def check_ip():
             ntfy.send(msg, priority="high")
 
 
+def _qbt_call(func, *args):
+    """Call a qBittorrent function with state tracking and notifications."""
+    prev_ok = state.qbt_ok
+    try:
+        result = func(*args)
+        state.qbt_ok = True
+        if prev_ok is False:
+            msg = "qBittorrent is reachable again"
+            logger.info(msg)
+            ntfy.send(msg, priority="default")
+        return result
+    except Exception:
+        state.qbt_ok = False
+        logger.exception("Failed to communicate with qBittorrent")
+        if prev_ok is not False:
+            msg = f"qBittorrent unreachable at {config.QBITTORRENT_URL}"
+            ntfy.send(msg, priority="high")
+        raise
+
+
 def adjust_speed():
     """Toggle qBittorrent alternative speed limits based on ping or override."""
     override = state.override
     if override is not None:
         logger.debug("Manual override active: alt speed %s", "on" if override else "off")
         try:
-            qbittorrent.set_alt_speed(override)
+            _qbt_call(qbittorrent.set_alt_speed, override)
             state.alt_speed_enabled = override
         except Exception:
-            logger.exception("Failed to set alt speed")
+            pass
         return
 
     if not config.PING_HOST:
@@ -115,14 +135,14 @@ def adjust_speed():
 
     try:
         alt_on = online
-        qbittorrent.set_alt_speed(alt_on)
+        _qbt_call(qbittorrent.set_alt_speed, alt_on)
         state.alt_speed_enabled = alt_on
         if online:
             logger.info("Host %s is online, alt speed enabled", config.PING_HOST)
         else:
             logger.info("Host %s is offline, alt speed disabled", config.PING_HOST)
     except Exception:
-        logger.exception("Failed to set alt speed")
+        pass
 
 
 def run_cycle():

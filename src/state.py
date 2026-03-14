@@ -13,6 +13,8 @@ class State:
         self._override: bool | None = None
         # Current alt speed state
         self.alt_speed_enabled: bool | None = None
+        # qBittorrent reachable
+        self.qbt_ok: bool | None = None
 
     @property
     def override(self) -> bool | None:
