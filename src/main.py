@@ -137,3 +137,7 @@ def main():
     while True:
         run_cycle()
         time.sleep(config.CHECK_INTERVAL)
+
+
+if __name__ == "__main__":
+    main()
