@@ -82,7 +82,7 @@ def check_ip():
 
     if ok:
         logger.info("Container %s public IP: %s (OK)", config.IP_CHECK_CONTAINER, ip)
-        if not prev_ok:
+        if prev_ok is False:
             msg = f"Container {config.IP_CHECK_CONTAINER}: IP is OK again ({ip}), resuming torrents"
             logger.info(msg)
             try:
