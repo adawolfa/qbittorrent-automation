@@ -66,8 +66,12 @@ def check_ip():
     if not ip:
         state.current_ip = ""
         state.ip_ok = False
+        try:
+            _qbt_call(qbittorrent.pause_all)
+        except Exception:
+            pass
         if prev_ok is not False:
-            msg = f"Container {config.IP_CHECK_CONTAINER}: network unreachable (ifconfig.me failed)"
+            msg = f"Container {config.IP_CHECK_CONTAINER}: network unreachable (ifconfig.me failed), torrents paused"
             logger.warning(msg)
             ntfy.send(msg, priority="high")
         return
@@ -78,14 +82,22 @@ def check_ip():
 
     if ok:
         logger.info("Container %s public IP: %s (OK)", config.IP_CHECK_CONTAINER, ip)
-        if prev_ok is False:
-            msg = f"Container {config.IP_CHECK_CONTAINER}: IP is OK again ({ip})"
+        if not prev_ok:
+            msg = f"Container {config.IP_CHECK_CONTAINER}: IP is OK again ({ip}), resuming torrents"
             logger.info(msg)
+            try:
+                _qbt_call(qbittorrent.resume_all)
+            except Exception:
+                pass
             ntfy.send(msg, priority="default")
     else:
         logger.warning("Container %s public IP: %s (NOT acceptable)", config.IP_CHECK_CONTAINER, ip)
+        try:
+            _qbt_call(qbittorrent.pause_all)
+        except Exception:
+            pass
         if prev_ok is not False or ip != prev_ip:
-            msg = f"Container {config.IP_CHECK_CONTAINER}: IP {ip} is not acceptable!"
+            msg = f"Container {config.IP_CHECK_CONTAINER}: IP {ip} is not acceptable! Torrents paused."
             ntfy.send(msg, priority="high")
 
 

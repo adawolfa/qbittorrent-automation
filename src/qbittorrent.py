@@ -23,3 +23,17 @@ def get_alt_speed() -> bool:
     url = f"{config.QBITTORRENT_URL}/api/v2/transfer/speedLimitsMode"
     resp = requests.get(url, timeout=_TIMEOUT)
     return resp.text.strip() == "1"
+
+
+def pause_all() -> None:
+    """Pause all torrents."""
+    url = f"{config.QBITTORRENT_URL}/api/v2/torrents/pause"
+    requests.post(url, data={"hashes": "all"}, timeout=_TIMEOUT)
+    logger.info("All torrents paused")
+
+
+def resume_all() -> None:
+    """Resume all torrents."""
+    url = f"{config.QBITTORRENT_URL}/api/v2/torrents/resume"
+    requests.post(url, data={"hashes": "all"}, timeout=_TIMEOUT)
+    logger.info("All torrents resumed")
